@@ -1,5 +1,7 @@
 // ignore_for_file: file_names
 
+import 'package:calendar_app/users/addUSer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class CreateEvent extends StatefulWidget {
@@ -10,8 +12,20 @@ class CreateEvent extends StatefulWidget {
 }
 
 class _CreateEventState extends State<CreateEvent> {
-  DateTime dateTime = DateTime(2022, 07, 19);
-  TimeOfDay time = const TimeOfDay(hour: 14, minute: 56);
+  DateTime dateTime = DateTime.now();
+  TimeOfDay time =  TimeOfDay.now();
+  CollectionReference users = FirebaseFirestore.instance.collection('Users');
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
+  late final TextEditingController locationController;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController();
+    descriptionController = TextEditingController();
+    locationController = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +63,24 @@ class _CreateEventState extends State<CreateEvent> {
               ),
               buildLocation(),
               buildDescription(),
-              Container(
-                margin: EdgeInsets.only(top: 20),
-                alignment: Alignment.center,
-                height: 40,
-                width: 100,
-                decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 127, 80),
-                    borderRadius: BorderRadius.circular(20)),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(color: Colors.white),
-                  textAlign: TextAlign.center,
+              InkWell(
+                onTap: () {
+                  AddUser(titleController.text, time, dateTime,
+                      descriptionController.text, locationController.text);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  alignment: Alignment.center,
+                  height: 40,
+                  width: 100,
+                  decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 255, 127, 80),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               )
             ],
@@ -145,9 +165,10 @@ class _CreateEventState extends State<CreateEvent> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       height: 45,
       margin: const EdgeInsets.all(35),
-      child: const TextField(
+      child:  TextField(
+        controller: titleController,
         cursorColor: Colors.black,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           label: Text(
             'Konu Başlığı',
             style: TextStyle(color: Colors.black),
@@ -191,9 +212,10 @@ class _CreateEventState extends State<CreateEvent> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       height: 45,
       margin: const EdgeInsets.only(top: 15, right: 35, left: 35),
-      child: const TextField(
+      child:  TextField(
+        controller: locationController,
         cursorColor: Colors.black,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           label: Text(
             'Konum',
             style: TextStyle(color: Colors.black),
@@ -237,10 +259,11 @@ class _CreateEventState extends State<CreateEvent> {
         ),
       ], color: Colors.white, borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.only(top: 20, right: 35, left: 35),
-      child: const TextField(
+      child: TextField(
+        controller: descriptionController,
         cursorColor: Colors.black,
         maxLines: 15,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           label: Text(
             'Açıklama',
             style: TextStyle(color: Colors.black),
