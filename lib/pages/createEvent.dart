@@ -1,7 +1,4 @@
 // ignore_for_file: file_names
-
-import 'package:calendar_app/users/addUSer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class CreateEvent extends StatefulWidget {
@@ -14,7 +11,6 @@ class CreateEvent extends StatefulWidget {
 class _CreateEventState extends State<CreateEvent> {
   DateTime dateTime = DateTime.now();
   TimeOfDay time =  TimeOfDay.now();
-  CollectionReference users = FirebaseFirestore.instance.collection('Users');
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController locationController;
@@ -65,8 +61,8 @@ class _CreateEventState extends State<CreateEvent> {
               buildDescription(),
               InkWell(
                 onTap: () {
-                  AddUser(titleController.text, time, dateTime,
-                      descriptionController.text, locationController.text);
+                  /* AddUser(titleController.text, time, dateTime,
+                      descriptionController.text, locationController.text); */
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),

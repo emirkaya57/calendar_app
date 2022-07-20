@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "878210617141",
+    "project_id": "planner-app-8029a",
+    "storage_bucket": "planner-app-8029a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878210617141:android:3671ba39c2153a8cc4067c",
+        "android_client_info": {
+          "package_name": "com.example.calendar_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878210617141-h5lgq8nsgp50r64h3a4m8t7hv97sl0po.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn8N1d4qaU4Y_GtBQavuhTZEBagtZRBgc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878210617141-h5lgq8nsgp50r64h3a4m8t7hv97sl0po.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
