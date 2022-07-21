@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, no_leading_underscores_for_local_identifiers
 import 'package:calendar_app/pages/createEvent.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -15,11 +16,26 @@ class _HomePageState extends State<HomePage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
   @override
+  void initState() {
+    super.initState();
+    auth.authStateChanges().listen((User? user) {
+      if (user == null) {
+        debugPrint('User is currently signed out!');
+      } else {
+        debugPrint('User is signed in!');
+      }
+    });
+  }
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-          toolbarHeight: 27, elevation: 0, backgroundColor: const Color(0xff79d598)),
+          toolbarHeight: 27,
+          elevation: 0,
+          backgroundColor: const Color(0xff79d598)),
       drawer: Drawer(
         child: Container(
           color: Colors.black,
@@ -57,10 +73,10 @@ class _HomePageState extends State<HomePage> {
                   shape: BoxShape.circle,
                   // borderRadius: BorderRadius.circular(20),
                   color: const Color(0xff79d598)),
-              todayDecoration:const  BoxDecoration(
+              todayDecoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                 // borderRadius: BorderRadius.circular(15),
-                  color:  Color(0xff3dc26c))),
+                  // borderRadius: BorderRadius.circular(15),
+                  color: Color(0xff3dc26c))),
           firstDay: DateTime.utc(2010, 10, 16),
           lastDay: DateTime.utc(2030, 3, 14),
           focusedDay: focusedDay,

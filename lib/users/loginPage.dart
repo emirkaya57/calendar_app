@@ -23,13 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     emailController = TextEditingController();
     passwordController = TextEditingController();
     auth = FirebaseAuth.instance;
-    auth.authStateChanges().listen((User? user) {
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        print('User is signed in!');
-      }
-    });
+   
   }
 
   @override
@@ -91,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
           onTap: () async {
             var userCredential = await auth.signInWithEmailAndPassword(
                 email: emailController.text, password: passwordController.text);
-            if (auth.currentUser!.emailVerified == true) {
+            if (auth.currentUser != null) {
               // ignore: use_build_context_synchronously
               Navigator.push(
                 context,

@@ -155,6 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onTap: () {
                   createUser();
                   Navigator.pop(context);
+                  debugPrint('email : ${emailController.text}/ password : ${passwordController.text}');
                 },
                 child: Container(
                   margin: const EdgeInsets.only(
