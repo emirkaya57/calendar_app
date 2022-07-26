@@ -2,6 +2,9 @@ import 'package:calendar_app/pages/HomePage.dart';
 import 'package:calendar_app/users/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -14,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
 
-  late FirebaseAuth auth;
+  late FirebaseAuth auth = FirebaseAuth.instance;
   bool isVisiblity = true;
 
   @override
@@ -22,8 +25,13 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    auth = FirebaseAuth.instance;
-   
+    auth.authStateChanges().listen((User? user) {
+      if (user == null) {
+        debugPrint('User is currently signed out!');
+      } else {
+        debugPrint('giriş yapınız');
+      }
+    });
   }
 
   @override
@@ -83,18 +91,25 @@ class _LoginPageState extends State<LoginPage> {
         ),
         InkWell(
           onTap: () async {
-            var userCredential = await auth.signInWithEmailAndPassword(
-                email: emailController.text, password: passwordController.text);
-            if (auth.currentUser != null) {
-              // ignore: use_build_context_synchronously
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomePage(),
-                ),
-              );
-            } else {
-              return;
+            try {
+              var userCredential = await auth.signInWithEmailAndPassword(
+                  email: emailController.text,
+                  password: passwordController.text);
+              if (auth.currentUser != null ) {
+                // ignore: use_build_context_synchronously
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangeNotifierProvider(
+                      create: (context) => Event(),
+                      child: const HomePage()),
+                  ),
+                );
+              } else {
+                return;
+              }
+            } catch (e) {
+              debugPrint(e.toString());
             }
           },
           child: Container(
@@ -249,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
   Container buildPassTextField() {
     return Container(
       height: 45,
-      margin: const EdgeInsets.only(left: 30, right: 30, top: 5),
+      margin: const EdgeInsets.only(left: 30, right: 30, top: 10),
       child: TextField(
         obscureText: isVisiblity,
         controller: passwordController,

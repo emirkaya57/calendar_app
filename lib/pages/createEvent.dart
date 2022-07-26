@@ -1,5 +1,12 @@
 // ignore_for_file: file_names
+import 'package:calendar_app/models/eventMOdel.dart';
+import 'package:calendar_app/pages/HomePage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../models/model.dart';
 
 class CreateEvent extends StatefulWidget {
   const CreateEvent({Key? key}) : super(key: key);
@@ -9,11 +16,13 @@ class CreateEvent extends StatefulWidget {
 }
 
 class _CreateEventState extends State<CreateEvent> {
-  DateTime dateTime = DateTime.now();
-  TimeOfDay time =  TimeOfDay.now();
+  DateTime dateTime = DateTime(2022, 07, 21);
+  TimeOfDay time = const TimeOfDay(hour: 11, minute: 28);
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController locationController;
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -32,7 +41,7 @@ class _CreateEventState extends State<CreateEvent> {
             'Create Event',
             style: TextStyle(fontSize: 24),
           ),
-          backgroundColor: const Color(0xff79d598),
+          backgroundColor: const Color(0xff5b5b5b),
           elevation: 0),
       body: eventStack(context),
     );
@@ -42,8 +51,11 @@ class _CreateEventState extends State<CreateEvent> {
     return SingleChildScrollView(
       child: Stack(children: [
         Container(
-            height: MediaQuery.of(context).size.height / 8,
-            decoration: const BoxDecoration(color: Color(0xff79d598))),
+          height: MediaQuery.of(context).size.height / 8,
+          decoration: const BoxDecoration(
+            color: Color(0xff5b5b5b),
+          ),
+        ),
         Container(
           margin: const EdgeInsets.only(top: 78),
           decoration: const BoxDecoration(
@@ -61,8 +73,8 @@ class _CreateEventState extends State<CreateEvent> {
               buildDescription(),
               InkWell(
                 onTap: () {
-                  /* AddUser(titleController.text, time, dateTime,
-                      descriptionController.text, locationController.text); */
+                  veriekle();
+                  EventWidget();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),
@@ -70,10 +82,11 @@ class _CreateEventState extends State<CreateEvent> {
                   height: 40,
                   width: 100,
                   decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 255, 127, 80),
+                      color: const Color(0xfff4ae06),
+                      //const Color.fromARGB(255, 255, 127, 80),
                       borderRadius: BorderRadius.circular(20)),
                   child: const Text(
-                    'Save',
+                    'Ekle',
                     style: TextStyle(color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
@@ -161,9 +174,11 @@ class _CreateEventState extends State<CreateEvent> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       height: 45,
       margin: const EdgeInsets.all(35),
-      child:  TextField(
+      child: TextField(
         controller: titleController,
-        cursorColor: Colors.black,
+        // onChanged: (s) {
+        //   Provider.of<Event>(context, listen: false).setTitle = s;
+        // },
         decoration: const InputDecoration(
           label: Text(
             'Konu Başlığı',
@@ -208,7 +223,7 @@ class _CreateEventState extends State<CreateEvent> {
       ], borderRadius: BorderRadius.circular(15), color: Colors.white),
       height: 45,
       margin: const EdgeInsets.only(top: 15, right: 35, left: 35),
-      child:  TextField(
+      child: TextField(
         controller: locationController,
         cursorColor: Colors.black,
         decoration: const InputDecoration(
@@ -295,5 +310,22 @@ class _CreateEventState extends State<CreateEvent> {
         ),
       ),
     );
+  }
+
+  void veriekle() async {
+    Map<String, dynamic> eklenecekUser = <String, dynamic>{};
+    eklenecekUser['başlık'] = titleController.text;
+    eklenecekUser['konum'] = locationController.text;
+    eklenecekUser['tarih'] = DateFormat('yyyy-MM-dd').format(dateTime);
+    // eklenecekUser['saat'] = time;
+    eklenecekUser['açıklama'] = descriptionController.text;
+    var token = auth.currentUser!.uid;
+    await firestore.doc('users/$token').set(eklenecekUser).then((value) {
+      Navigator.pop(
+        context,
+        Event.allParameters(titleController.text, DateTime.now(),
+            locationController.text, descriptionController.text),
+      );
+    });
   }
 }
