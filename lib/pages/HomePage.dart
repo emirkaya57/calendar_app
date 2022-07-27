@@ -1,5 +1,6 @@
 import 'package:calendar_app/models/eventMOdel.dart';
 import 'package:calendar_app/models/model.dart';
+import 'package:calendar_app/pages/EventWidget.dart';
 import 'package:calendar_app/pages/createEvent.dart';
 import 'package:calendar_app/users/loginPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,11 +16,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<EventModel> eventList = [];
   CalendarFormat format = CalendarFormat.month;
-  DateTime selectedDay = DateTime.now();
+  DateTime selectedDay = DateTime(2022, 07, 15);
   DateTime focusedDay = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   String? aciklama;
   String? title;
   DateTime? date;
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _events = {};
     auth.authStateChanges().listen((User? user) {
       if (user == null) {
         debugPrint('User is currently signed out!');
@@ -34,20 +36,38 @@ class _HomePageState extends State<HomePage> {
         debugPrint('User is signed in!');
       }
     });
-    //getData();
+      selectedEvents = _events[selectedDay] ?? [];
   }
 
-  /*  Future getData() async {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(auth.currentUser!.uid)
-        .get();
-
-    String aciklama = await userDoc.get('açıklama');
-    String title = await userDoc.get('başlık');
-    String location = await userDoc.get('konum');
-    debugPrint('title $title');
-  } */
+  List selectedEvents = [];
+  late Map<DateTime, List<EventModel>> _events = {
+    DateTime(2020, 1, 1): [
+      EventModel(
+        tarih: DateTime(2020, 1, 1),
+        baslik: firestore
+            .collection('users')
+            .doc(auth.currentUser!.uid)
+            .get()
+            .then((value) {
+          value.get('başlık');
+        }).toString(),
+        aciklama: 'Event 1 description',
+        konum: 'Event 1 location',
+      ),
+      EventModel(
+        tarih: DateTime(2020, 1, 1),
+        baslik: 'Event 2',
+        aciklama: 'Event 2 description',
+        konum: 'Event 2 location',
+      ),
+    ],
+  };
+  void handleData(date) {
+    setState(() {
+      selectedDay = date;
+      selectedEvents = _events[selectedDay] ?? [];
+    });
+  }
 
   FirebaseAuth auth = FirebaseAuth.instance;
   @override
@@ -93,25 +113,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Stack buildStack(double height, BuildContext context) {
+  Widget buildStack(double height, BuildContext context) {
     final Stream<QuerySnapshot> dataStream =
         FirebaseFirestore.instance.collection('users').snapshots();
     // debugPrint('Provider verisi ::: ' +
     //     (Provider.of<Event>(context).getTitle ?? 'kayıtlı veri yok'));
-    return Stack(
+    return Column(
       children: [
         Container(
           // margin: const EdgeInsets.only(top: 27.5),
           decoration: const BoxDecoration(color: Color(0xff5b5b5b)),
-          height: height - 360,
+          height: height * 0.5,
           child: TableCalendar(
-            onDaySelected: (DateTime selectday, DateTime focusday) {
+            onPageChanged: (focDay) {
               setState(() {
-                selectedDay = selectday;
-                focusedDay = focusday;
+                focusedDay = focDay;
               });
-              
             },
+            onDaySelected: (DateTime date, DateTime selectedDate) {
+                handleData(selectedDate);
+            
+            },
+            // eventLoader: _getEventfromDay,
             selectedDayPredicate: (day) {
               return isSameDay(selectedDay, day);
             },
@@ -150,80 +173,16 @@ class _HomePageState extends State<HomePage> {
             lastDay: DateTime.utc(2030, 3, 14),
             focusedDay: focusedDay,
           ),
-        
         ),
-        Container(
-          height: height,
-          margin: EdgeInsets.only(top: height / 2),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20), topLeft: Radius.circular(20))),
-          child: const EventWidget(),
-
-          /* StreamBuilder<QuerySnapshot>(
-            stream: dataStream,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {}
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              List dataDocs = [];
-              snapshot.data?.docs.map((DocumentSnapshot document) {
-                Map a = document.data() as Map<String, dynamic>;
-                dataDocs.add(a);
-                a['id'] = document.id;
-              }).toList();
-
-              return ListView.builder(
-                itemCount: dataDocs.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(top: 10),
-                    width: 100,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                      color: Colors.grey.shade700,
-                      width: 1,
-                    )),
-                    child: Column(
-                      children: [
-                        Text(
-                          dataDocs[index]['başlık'].toString(),
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        Text(
-                          dataDocs[index]['açıklama'].toString(),
-                        )
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          ), */
-        )
+        const EventWidget(),
       ],
     );
   }
-}
 
-class EventWidget extends StatefulWidget {
-  const EventWidget({Key? key}) : super(key: key);
-
-  @override
-  State<EventWidget> createState() => _EventWidgetState();
-}
-
-class _EventWidgetState extends State<EventWidget> {
-  @override
-  Widget build(BuildContext context) {
+  Widget selectBuider(Stream<QuerySnapshot<Object?>> dataStream) {
     final Stream<QuerySnapshot> dataStream =
         FirebaseFirestore.instance.collection('users').snapshots();
-    return StreamBuilder<QuerySnapshot>(
+    StreamBuilder<QuerySnapshot>(
       stream: dataStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {}
@@ -267,13 +226,17 @@ class _EventWidgetState extends State<EventWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           dataDocs[index]['başlık'].toString(),
                           style: const TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(dataDocs[index]['tarih'].toString()),
                       ],
                     ),
                     const SizedBox(
@@ -296,19 +259,8 @@ class _EventWidgetState extends State<EventWidget> {
         );
       },
     );
+    return Container();
   }
 }
-/*  ListView.builder(
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(top: 10),
-                width: 100,
-                height: 50,
-                color: Colors.orange,
-                child: Column(
-                  children: [],
-                ),
-              );
-            },
-          ), */
+
+

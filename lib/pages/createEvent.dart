@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 import 'package:calendar_app/models/eventMOdel.dart';
+import 'package:calendar_app/pages/EventWidget.dart';
 import 'package:calendar_app/pages/HomePage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,13 +17,14 @@ class CreateEvent extends StatefulWidget {
 }
 
 class _CreateEventState extends State<CreateEvent> {
-  DateTime dateTime = DateTime(2022, 07, 21);
+  DateTime dateTime = DateTime.now();
   TimeOfDay time = const TimeOfDay(hour: 11, minute: 28);
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController locationController;
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  DateTime selectedDay = DateTime(2022, 07, 21);
 
   @override
   void initState() {
@@ -30,6 +32,12 @@ class _CreateEventState extends State<CreateEvent> {
     titleController = TextEditingController();
     descriptionController = TextEditingController();
     locationController = TextEditingController();
+    _events = {};
+  }
+
+  late Map<DateTime, List<EventModel>> _events;
+  List<EventModel> _getEventfromDay(DateTime date) {
+    return _events[date] ?? [];
   }
 
   @override
@@ -74,7 +82,7 @@ class _CreateEventState extends State<CreateEvent> {
               InkWell(
                 onTap: () {
                   veriekle();
-                  EventWidget();
+                  const EventWidget();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),
