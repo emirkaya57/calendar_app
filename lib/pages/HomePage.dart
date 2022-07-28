@@ -1,6 +1,4 @@
-import 'package:calendar_app/models/eventMOdel.dart';
 import 'package:calendar_app/models/model.dart';
-import 'package:calendar_app/pages/EventWidget.dart';
 import 'package:calendar_app/pages/createEvent.dart';
 import 'package:calendar_app/users/loginPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   CalendarFormat format = CalendarFormat.month;
-  DateTime selectedDay = DateTime(2022, 07, 15);
+  DateTime selectedDay = DateTime(2022 - 07 - 27);
   DateTime focusedDay = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -28,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _events = {};
+    getData(selectedDay);
     auth.authStateChanges().listen((User? user) {
       if (user == null) {
         debugPrint('User is currently signed out!');
@@ -36,36 +34,12 @@ class _HomePageState extends State<HomePage> {
         debugPrint('User is signed in!');
       }
     });
-      selectedEvents = _events[selectedDay] ?? [];
+    getData(selectedDay);
   }
 
-  List selectedEvents = [];
-  late Map<DateTime, List<EventModel>> _events = {
-    DateTime(2020, 1, 1): [
-      EventModel(
-        tarih: DateTime(2020, 1, 1),
-        baslik: firestore
-            .collection('users')
-            .doc(auth.currentUser!.uid)
-            .get()
-            .then((value) {
-          value.get('başlık');
-        }).toString(),
-        aciklama: 'Event 1 description',
-        konum: 'Event 1 location',
-      ),
-      EventModel(
-        tarih: DateTime(2020, 1, 1),
-        baslik: 'Event 2',
-        aciklama: 'Event 2 description',
-        konum: 'Event 2 location',
-      ),
-    ],
-  };
   void handleData(date) {
     setState(() {
       selectedDay = date;
-      selectedEvents = _events[selectedDay] ?? [];
     });
   }
 
@@ -114,8 +88,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildStack(double height, BuildContext context) {
-    final Stream<QuerySnapshot> dataStream =
-        FirebaseFirestore.instance.collection('users').snapshots();
     // debugPrint('Provider verisi ::: ' +
     //     (Provider.of<Event>(context).getTitle ?? 'kayıtlı veri yok'));
     return Column(
@@ -131,8 +103,15 @@ class _HomePageState extends State<HomePage> {
               });
             },
             onDaySelected: (DateTime date, DateTime selectedDate) {
+              if (selectedDay == selectedDate) {
                 handleData(selectedDate);
-            
+                const EventWidget();
+              }
+              setState(() {
+                selectedDay = selectedDate;
+              });
+
+              getData(selectedDate);
             },
             // eventLoader: _getEventfromDay,
             selectedDayPredicate: (day) {
@@ -174,15 +153,48 @@ class _HomePageState extends State<HomePage> {
             focusedDay: focusedDay,
           ),
         ),
-        const EventWidget(),
+        const EventWidget()
       ],
     );
   }
 
-  Widget selectBuider(Stream<QuerySnapshot<Object?>> dataStream) {
+  getData(DateTime selectDay) async {
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    await userRef
+        .where(
+          'tarih',
+          isEqualTo: '2022-07-27',
+        )
+        .where('açıklama', isEqualTo: aciklama)
+        .get()
+        .then((value) {
+      for (var element in value.docs) {
+        debugPrint('::::: ${(element.data() as Map?)?['konum'] ?? ''}');
+      }
+    });
+  }
+}
+
+class EventWidget extends StatefulWidget {
+  const EventWidget({Key? key}) : super(key: key);
+  @override
+  State<EventWidget> createState() => EventWidgetState();
+}
+
+class EventWidgetState extends State<EventWidget> {
+  DateTime selectedDay = DateTime(2022, 07, 15);
+  DateTime focusedDay = DateTime.now();
+  String? aciklama;
+  String? title;
+  DateTime? date;
+  String? location;
+
+  @override
+  Widget build(BuildContext context) {
     final Stream<QuerySnapshot> dataStream =
         FirebaseFirestore.instance.collection('users').snapshots();
-    StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<QuerySnapshot>(
       stream: dataStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {}
@@ -198,69 +210,76 @@ class _HomePageState extends State<HomePage> {
           a['id'] = document.id;
         }).toList();
         return ListView.builder(
-          itemCount: dataDocs.length,
-          itemBuilder: (context, index) {
-            return Container(
-              margin: const EdgeInsets.only(top: 10, left: 5, right: 5),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(
-                        5.0,
-                        5.0,
-                      ),
-                      blurRadius: 10.0,
-                      spreadRadius: 2.0,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.grey.shade700,
-                    width: 1,
-                  )),
-              child: Container(
-                margin: const EdgeInsets.only(right: 5, left: 5),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            shrinkWrap: true,
+            itemCount: dataDocs.length,
+            itemBuilder: (context, index) {
+              if (dataDocs[index]['tarih'] != OnDaySelected) {
+                return Container(
+                  margin: const EdgeInsets.only(top: 10, left: 5, right: 5),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(
+                            5.0,
+                            5.0,
+                          ),
+                          blurRadius: 10.0,
+                          spreadRadius: 2.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.shade700,
+                        width: 1,
+                      )),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 5, left: 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          dataDocs[index]['başlık'].toString(),
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              dataDocs[index]['başlık'].toString(),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              dataDocs[index]['tarih'].toString(),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            /*  Text(tarih1.toString()), */
+                          ],
                         ),
                         const SizedBox(
-                          width: 10,
+                          height: 5,
                         ),
-                        Text(dataDocs[index]['tarih'].toString()),
+                        Text(
+                          dataDocs[index]['açıklama'].toString(),
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        Text(dataDocs[index]['konum'].toString(),
+                            style: const TextStyle(
+                                fontSize: 10, fontWeight: FontWeight.w600))
                       ],
                     ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      dataDocs[index]['açıklama'].toString(),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Text(dataDocs[index]['konum'].toString(),
-                        style: const TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w600))
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+                  ),
+                );
+              }
+              return Container();
+            });
       },
     );
-    return Container();
   }
 }
-
-

@@ -67,9 +67,12 @@ class _CreateEventState extends State<CreateEvent> {
         Container(
           margin: const EdgeInsets.only(top: 78),
           decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20), topLeft: Radius.circular(15))),
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(15),
+            ),
+          ),
           child: Column(
             children: [
               buildTitle(),
@@ -82,7 +85,7 @@ class _CreateEventState extends State<CreateEvent> {
               InkWell(
                 onTap: () {
                   veriekle();
-                  const EventWidget();
+                  EventWidget();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),
