@@ -1,4 +1,5 @@
 import 'package:calendar_app/models/model.dart';
+import 'package:calendar_app/pages/EventWidget.dart';
 import 'package:calendar_app/pages/createEvent.dart';
 import 'package:calendar_app/users/loginPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   CalendarFormat format = CalendarFormat.month;
-  DateTime selectedDay = DateTime(2022 - 07 - 27);
+  DateTime selectedDay = DateTime(2022 - 07 - 28);
   DateTime focusedDay = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -105,13 +106,13 @@ class _HomePageState extends State<HomePage> {
             onDaySelected: (DateTime date, DateTime selectedDate) {
               if (selectedDay == selectedDate) {
                 handleData(selectedDate);
-                const EventWidget();
+
+                //const EventWidget();
               }
               setState(() {
                 selectedDay = selectedDate;
+                getData(selectedDate);
               });
-
-              getData(selectedDate);
             },
             // eventLoader: _getEventfromDay,
             selectedDayPredicate: (day) {
@@ -158,128 +159,33 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  getData(DateTime selectDay) async {
-    CollectionReference userRef =
-        FirebaseFirestore.instance.collection('users');
-    await userRef
-        .where(
-          'tarih',
-          isEqualTo: '2022-07-27',
-        )
-        .where('açıklama', isEqualTo: aciklama)
-        .get()
-        .then((value) {
-      for (var element in value.docs) {
-        debugPrint('::::: ${(element.data() as Map?)?['konum'] ?? ''}');
-      }
-    });
-  }
-}
-
-class EventWidget extends StatefulWidget {
-  const EventWidget({Key? key}) : super(key: key);
-  @override
-  State<EventWidget> createState() => EventWidgetState();
-}
-
-class EventWidgetState extends State<EventWidget> {
-  DateTime selectedDay = DateTime(2022, 07, 15);
-  DateTime focusedDay = DateTime.now();
-  String? aciklama;
-  String? title;
-  DateTime? date;
-  String? location;
-
-  @override
-  Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> dataStream =
-        FirebaseFirestore.instance.collection('users').snapshots();
-    return StreamBuilder<QuerySnapshot>(
-      stream: dataStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {}
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          const Center(
-            child: CircularProgressIndicator(),
-          );
+  getData(selectDay) async {
+    if (selectedDay == selectDay) {
+      CollectionReference userRef =
+          FirebaseFirestore.instance.collection('users');
+      await userRef
+          .where(
+            'tarih',
+            isGreaterThanOrEqualTo: selectDay,
+          )
+          .where('açıklama', isEqualTo: aciklama)
+          .get()
+          .then((value) {
+        for (var element in value.docs) {
+          debugPrint('::::: ${(element.data() as Map?)?['konum'] ?? ''}');
+          /*  Column(
+          children: [
+            Text((element.data() as Map?)?['başlık'] ?? ''),
+            Text((element.data() as Map?)?['açıklama'] ?? ''),
+            Text((element.data() as Map?)?['title'] ?? ''),
+          ],
+        ); */
         }
-        List dataDocs = [];
-        snapshot.data?.docs.map((DocumentSnapshot document) {
-          Map a = document.data() as Map<String, dynamic>;
-          dataDocs.add(a);
-          a['id'] = document.id;
-        }).toList();
-        return ListView.builder(
-            shrinkWrap: true,
-            itemCount: dataDocs.length,
-            itemBuilder: (context, index) {
-              if (dataDocs[index]['tarih'] != OnDaySelected) {
-                return Container(
-                  margin: const EdgeInsets.only(top: 10, left: 5, right: 5),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          offset: Offset(
-                            5.0,
-                            5.0,
-                          ),
-                          blurRadius: 10.0,
-                          spreadRadius: 2.0,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.grey.shade700,
-                        width: 1,
-                      )),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 5, left: 5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              dataDocs[index]['başlık'].toString(),
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              dataDocs[index]['tarih'].toString(),
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            /*  Text(tarih1.toString()), */
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          dataDocs[index]['açıklama'].toString(),
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Text(dataDocs[index]['konum'].toString(),
-                            style: const TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.w600))
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return Container();
-            });
-      },
-    );
+      });
+    } else {
+      debugPrint('::::: else');
+    }
+
+    return Container();
   }
 }
