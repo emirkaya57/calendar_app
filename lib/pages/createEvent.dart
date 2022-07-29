@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 import 'package:calendar_app/models/eventMOdel.dart';
 import 'package:calendar_app/pages/EventWidget.dart';
-import 'package:calendar_app/pages/HomePage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,7 @@ class _CreateEventState extends State<CreateEvent> {
               InkWell(
                 onTap: () {
                   veriekle();
-                  EventWidget();
+                  const EventWidget();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),
@@ -327,7 +326,7 @@ class _CreateEventState extends State<CreateEvent> {
     Map<String, dynamic> eklenecekUser = <String, dynamic>{};
     eklenecekUser['başlık'] = titleController.text;
     eklenecekUser['konum'] = locationController.text;
-    eklenecekUser['tarih'] = DateFormat('yyyy-MM-dd').format(dateTime);
+    eklenecekUser['tarih'] = DateFormat('yyyy-mm-dd').format(dateTime);
     // eklenecekUser['saat'] = time;
     eklenecekUser['açıklama'] = descriptionController.text;
     var token = auth.currentUser!.uid;

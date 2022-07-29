@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -40,7 +39,7 @@ class EventWidgetState extends State<EventWidget> {
             shrinkWrap: true,
             itemCount: dataDocs.length,
             itemBuilder: (context, index) {
-              if (dataDocs[index]['tarih'] != OnDaySelected) {
+              if (OnDaySelected != dataDocs[index]['tarih']) {
                 return Container(
                   margin: const EdgeInsets.only(top: 10, left: 5, right: 5),
                   decoration: BoxDecoration(
@@ -61,8 +60,8 @@ class EventWidgetState extends State<EventWidget> {
                         color: Colors.grey.shade700,
                         width: 1,
                       )),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 5, left: 5),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -103,6 +102,8 @@ class EventWidgetState extends State<EventWidget> {
                     ),
                   ),
                 );
+              } else {
+               Container();
               }
               return Container();
             });

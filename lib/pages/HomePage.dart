@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           // margin: const EdgeInsets.only(top: 27.5),
           decoration: const BoxDecoration(color: Color(0xff5b5b5b)),
-          height: height * 0.5,
+          height: height * 0.6,
           child: TableCalendar(
             onPageChanged: (focDay) {
               setState(() {
@@ -173,6 +173,7 @@ class _HomePageState extends State<HomePage> {
           .then((value) {
         for (var element in value.docs) {
           debugPrint('::::: ${(element.data() as Map?)?['konum'] ?? ''}');
+
           /*  Column(
           children: [
             Text((element.data() as Map?)?['başlık'] ?? ''),
