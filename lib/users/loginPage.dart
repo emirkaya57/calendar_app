@@ -95,18 +95,35 @@ class _LoginPageState extends State<LoginPage> {
               var userCredential = await auth.signInWithEmailAndPassword(
                   email: emailController.text,
                   password: passwordController.text);
-              if (auth.currentUser != null ) {
+              if (auth.currentUser != null) {
                 // ignore: use_build_context_synchronously
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChangeNotifierProvider(
-                      create: (context) => Event(),
-                      child: const HomePage()),
+                        create: (context) => Event(), child: const HomePage()),
                   ),
                 );
-              } else {
-                return;
+              } else if (auth.currentUser == null) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Kullanıcı Hatası'),
+                    content: const Text('Kullanıcı Bulunamadı'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Ok"),
+                      ),
+                      TextButton(onPressed: (){
+                        Navigator.of(context).pop();
+                    
+                      }, child: const Text('Cancel')),
+                    ],
+                  ),  
+              );
               }
             } catch (e) {
               debugPrint(e.toString());

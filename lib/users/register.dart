@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class _RegisterPageState extends State<RegisterPage> {
   late FirebaseAuth auth;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   @override
   void initState() {
     super.initState();
@@ -233,7 +235,9 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  createUser() async {
+  Future<User?> createUser() async {
+    var userCredential = await auth.createUserWithEmailAndPassword(
+        email: emailController.text, password: passwordController.text);
     try {
       var userCredential = await auth.createUserWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
@@ -246,5 +250,9 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       debugPrint(e.toString());
     }
+    await firestore.collection('users').doc(auth.currentUser!.uid).set({
+      
+    });
+    return userCredential.user;
   }
 }
