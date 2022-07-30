@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import '../data/get_user_description.dart';
 import '../data/get_user_title.dart';
 
@@ -22,11 +21,6 @@ class _HomePageState extends State<HomePage> {
   DateTime selectedDay = DateTime(2022 - 07 - 28);
   DateTime focusedDay = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  String? aciklama;
-  String? title;
-  DateTime? date;
-  String? location;
   @override
   void initState() {
     super.initState();
@@ -48,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     await firestore.collection('users').get().then((value) {
       for (var element in value.docs) {
         debugPrint(element.reference.toString());
-        docId.add(element.reference.id.toString());
+        docId.add(element.reference.id);
       }
     });
   }
@@ -121,12 +115,9 @@ class _HomePageState extends State<HomePage> {
             onDaySelected: (DateTime date, DateTime selectedDate) {
               if (selectedDay == selectedDate) {
                 handleData(selectedDate);
-
-                //const EventWidget();
               }
               setState(() {
                 selectedDay = selectedDate;
-                // getData(selectedDate);
               });
             },
             // eventLoader: _getEventfromDay,
@@ -179,6 +170,7 @@ class _HomePageState extends State<HomePage> {
                   return Container(
                     margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                             color: const Color(0xff5b5b5b), width: 1)),
                     child: ListTile(
@@ -216,13 +208,7 @@ class _HomePageState extends State<HomePage> {
         for (var element in value.docs) {
           debugPrint('::::: ${(element.data() as Map?)?['konum'] ?? ''}');
 
-          /*  Column(
-          children: [
-            Text((element.data() as Map?)?['başlık'] ?? ''),
-            Text((element.data() as Map?)?['açıklama'] ?? ''),
-            Text((element.data() as Map?)?['title'] ?? ''),
-          ],
-        ); */
+         
         }
       });
    
