@@ -250,9 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       debugPrint(e.toString());
     }
-    await firestore.collection('users').doc(auth.currentUser!.uid).set({
-      
-    });
+     firestore.collection('users').doc(auth.currentUser!.uid);
     return userCredential.user;
   }
 }

@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
               var userCredential = await auth.signInWithEmailAndPassword(
                   email: emailController.text,
                   password: passwordController.text);
-              if (auth.currentUser != null) {
+              if (auth.currentUser != null)  {
                 // ignore: use_build_context_synchronously
                 Navigator.push(
                   context,
@@ -117,13 +117,14 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: const Text("Ok"),
                       ),
-                      TextButton(onPressed: (){
-                        Navigator.of(context).pop();
-                    
-                      }, child: const Text('Cancel')),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Cancel')),
                     ],
-                  ),  
-              );
+                  ),
+                );
               }
             } catch (e) {
               debugPrint(e.toString());

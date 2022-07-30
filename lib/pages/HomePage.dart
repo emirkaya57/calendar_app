@@ -1,11 +1,14 @@
+import 'package:calendar_app/data/get_user_date.dart';
 import 'package:calendar_app/models/model.dart';
-import 'package:calendar_app/pages/EventWidget.dart';
 import 'package:calendar_app/pages/createEvent.dart';
 import 'package:calendar_app/users/loginPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../data/get_user_description.dart';
+import '../data/get_user_title.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -27,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    getData(selectedDay);
+    // getData(selectedDay);
     auth.authStateChanges().listen((User? user) {
       if (user == null) {
         debugPrint('User is currently signed out!');
@@ -35,7 +38,19 @@ class _HomePageState extends State<HomePage> {
         debugPrint('User is signed in!');
       }
     });
-    getData(selectedDay);
+    getDocId();
+    //getData(selectedDay);
+  }
+
+  List<String> docId = [];
+
+  Future getDocId() async {
+    await firestore.collection('users').get().then((value) {
+      for (var element in value.docs) {
+        debugPrint(element.reference.toString());
+        docId.add(element.reference.id.toString());
+      }
+    });
   }
 
   void handleData(date) {
@@ -111,7 +126,7 @@ class _HomePageState extends State<HomePage> {
               }
               setState(() {
                 selectedDay = selectedDate;
-                getData(selectedDate);
+                // getData(selectedDate);
               });
             },
             // eventLoader: _getEventfromDay,
@@ -154,13 +169,40 @@ class _HomePageState extends State<HomePage> {
             focusedDay: focusedDay,
           ),
         ),
-        const EventWidget()
+        Expanded(
+          child: FutureBuilder(
+            future: getDocId(),
+            builder: (context, snapshot) {
+              return ListView.builder(
+                itemCount: docId.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: const Color(0xff5b5b5b), width: 1)),
+                    child: ListTile(
+                      title: GetUserTitle(
+                        documentId: docId[index],
+                      ),
+                      subtitle: GetUserDescription(
+                        documentId: docId[index],
+                      ),
+                      trailing: GetUserDate(
+                        documentId: docId[index],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        )
       ],
     );
   }
 
-  getData(selectDay) async {
-    if (selectedDay == selectDay) {
+  /*  getData(selectDay) async {
       CollectionReference userRef =
           FirebaseFirestore.instance.collection('users');
       await userRef
@@ -183,10 +225,8 @@ class _HomePageState extends State<HomePage> {
         ); */
         }
       });
-    } else {
-      debugPrint('::::: else');
-    }
+   
 
     return Container();
-  }
+  } */
 }
